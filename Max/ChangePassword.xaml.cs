@@ -1,17 +1,7 @@
 ﻿using Max.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Max
 {
@@ -20,7 +10,7 @@ namespace Max
     /// </summary>
     public partial class ChangePassword : Window
     {
-        private int _userId;
+        private readonly int _userId;
 
         public ChangePassword(int userId)
         {
@@ -43,6 +33,7 @@ namespace Max
                 return;
             }
 
+            // Проверка совпадения нового пароля и его подтверждения
             if (newPassword != confirmNewPassword)
             {
                 MessageBox.Show("Новый пароль и подтверждение не совпадают", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -51,7 +42,7 @@ namespace Max
 
             try
             {
-                using (var context = new UserContext())
+                using (var context = new HotelManagementContext())
                 {
                     var user = context.Users.FirstOrDefault(u => u.Id == _userId);
                     if (user == null)
@@ -67,6 +58,7 @@ namespace Max
                         return;
                     }
 
+                    // Обновление пароля пользователя
                     user.Password = newPassword;
                     user.IsFirstLogin = false;
                     context.SaveChanges();

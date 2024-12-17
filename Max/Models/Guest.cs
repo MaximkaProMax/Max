@@ -7,17 +7,17 @@ public partial class Guest
 {
     public int Id { get; set; }
 
-    public string? Name { get; set; }
+    public string FirstName { get; set; } = null!;
 
-    public string? Surname { get; set; }
+    public string LastName { get; set; } = null!;
 
-    public string? Patronym { get; set; }
-
-    public DateOnly? Birthdate { get; set; }
+    public string Email { get; set; } = null!;
 
     public string? Phone { get; set; }
 
-    public string? Email { get; set; }
+    public string DocumentNumber { get; set; } = null!;
 
-    public string? Passport { get; set; }
+    public DateOnly CheckIn { get; set; }
+
+    public DateOnly CheckOut { get; set; }
 }

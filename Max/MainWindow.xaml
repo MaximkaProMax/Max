@@ -44,7 +44,7 @@
                      BorderBrush="White"/>
             <TextBlock Text="Пароль" FontSize="16" Foreground="White" FontFamily="Cascadia Code"/>
 
-            <TextBox x:Name="Password"
+            <PasswordBox x:Name="Password"
                  Margin="0, 10"
                  FontWeight="Bold"
                  Foreground="#5D3F57"
