@@ -237,7 +237,7 @@ public partial class HotelManagementContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("id");
             entity.Property(e => e.IsFirstLogin).HasColumnName("isFirstLogin");
-            entity.Property(e => e.LastLoginData).HasColumnType("datetime");
+            entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
             entity.Property(e => e.Lastname)
                 .HasMaxLength(255)
                 .HasColumnName("lastname");

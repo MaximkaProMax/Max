@@ -27,5 +27,5 @@ public partial class User
 
     public bool? IsFirstLogin { get; set; }
 
-    public DateTime? LastLoginData { get; set; }
+    public DateTime? LastLoginDate { get; set; }
 }
