@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 using Max.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 
 namespace Max
 {
@@ -27,66 +28,54 @@ namespace Max
             string login = Username.Text.Trim();
             string password = Password.Password.Trim();
 
-            // Проверка поля заполнены
+            // Проверка заполненности полей
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Пожалуйста, введите логин и пароль.");
                 return;
             }
 
-            using (var context = new HotelManagementContext())
+            try
             {
-                var user = await context.Users
-                    .Where(u => u.Username == login)
-                    .FirstOrDefaultAsync();
-
-                // Проверка существования пользователя
-                if (user == null)
+                using (var context = new HotelManagementContext())
                 {
-                    MessageBox.Show("Неправильный логин или пароль.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                    var user = await context.Users
+                        .Where(u => u.Username == login)
+                        .FirstOrDefaultAsync();
 
-                // Проверка на блокировку пользователя
-                if (user.IsLocked ?? false)
-                {
-                    MessageBox.Show("Вы заблокированы. Обратитесь к администратору.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Проверка на длительное отсутствие входа
-                if (user.LastLoginDate.HasValue && (DateTime.Now - user.LastLoginDate.Value).TotalDays > 30 && user.Role != "Admin")
-                {
-                    user.IsLocked = true;
-                    await context.SaveChangesAsync();
-                    MessageBox.Show("Ваша учетная запись заблокирована из-за длительного отсутствия входа. Обратитесь к администратору.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Проверка пароля
-                if (user.Password == password)
-                {
-                    user.LastLoginDate = DateTime.Now;
-
-                    // Сброс неудачных попыток
-                    user.FailedLoginAttempts = 0;
-                    await context.SaveChangesAsync();
-
-                    MessageBox.Show("Вы успешно авторизовались!", "Добро пожаловать", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    // Скрываем основное окно перед показом окна смены пароля
-                    var changePasswordWindow = new ChangePassword(user.Id);
-                    this.Hide();
-                    changePasswordWindow.ShowDialog();
-
-                    if (changePasswordWindow.DialogResult == true)
+                    // Проверка существования пользователя
+                    if (user == null)
                     {
-                        // Проверка первого входа
-                        if (user.IsFirstLogin == true)
-                        {
-                            user.IsFirstLogin = false;
-                            await context.SaveChangesAsync();
-                        }
+                        MessageBox.Show("Неправильный логин или пароль.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Проверка на блокировку пользователя
+                    if (user.IsLocked ?? false)
+                    {
+                        MessageBox.Show("Вы заблокированы. Обратитесь к администратору.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // Проверка на длительное отсутствие входа
+                    if (user.LastLoginDate.HasValue && (DateTime.Now - user.LastLoginDate.Value).TotalDays > 30 && user.Role != "Admin")
+                    {
+                        user.IsLocked = true;
+                        await context.SaveChangesAsync();
+                        MessageBox.Show("Ваша учетная запись заблокирована из-за длительного отсутствия входа. Обратитесь к администратору.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // Проверка пароля
+                    if (user.Password == password)
+                    {
+                        user.LastLoginDate = DateTime.Now;
+
+                        // Сброс неудачных попыток
+                        user.FailedLoginAttempts = 0;
+                        await context.SaveChangesAsync();
+
+                        MessageBox.Show("Вы успешно авторизовались!", "Добро пожаловать", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         // Открываем соответствующее окно в зависимости от роли пользователя
                         if (user.Role == "Admin")
@@ -99,28 +88,29 @@ namespace Max
                             var mainWindow = new MainWindow();
                             mainWindow.Show();
                         }
-                    }
 
-                    this.Close(); // Закрываем MainWindow после смены пароля или открытия другого окна
-                }
-                else
-                {
-                    // Увеличение счетчика неудачных попыток
-                    user.FailedLoginAttempts++;
-
-                    if (user.FailedLoginAttempts >= 3)
-                    {
-                        user.IsLocked = true;
-                        MessageBox.Show("Вы заблокированы после 3 неудачных попыток. Обратитесь к администратору.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        this.Close(); // Закрываем MainWindow после успешной авторизации и открытия другого окна
                     }
                     else
                     {
+                        // Увеличение счетчика неудачных попыток
+                        user.FailedLoginAttempts++;
+
+                        if (user.FailedLoginAttempts >= 3)
+                        {
+                            user.IsLocked = true;
+                            MessageBox.Show("Вы заблокированы после 3 неудачных попыток. Обратитесь к администратору.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+
                         int attemptsLeft = 3 - (user.FailedLoginAttempts ?? 0);
                         MessageBox.Show($"Неправильный логин или пароль. Осталось попыток: {attemptsLeft}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        await context.SaveChangesAsync();
                     }
-
-                    await context.SaveChangesAsync();
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка при выполнении запроса к базе данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
