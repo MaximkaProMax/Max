@@ -78,7 +78,7 @@ namespace Max
                         MessageBox.Show("Вы успешно авторизовались!", "Добро пожаловать", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         // Открываем соответствующее окно в зависимости от роли пользователя
-                        if (user.Role == "Admin")
+                        if (user.Role == "Админ")
                         {
                             var adminWindow = new AdminWindow();
                             adminWindow.Show();

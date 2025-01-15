@@ -109,7 +109,7 @@
                     <ComboBoxItem Content="Клиент"/>
                 </ComboBox>
             </Grid>
-
+            
             <Grid Margin="5">
                 <TextBox x:Name="EmailTextBox"
                          Margin="0"

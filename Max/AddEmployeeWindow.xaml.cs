@@ -14,17 +14,18 @@ namespace Max
 
         private async void AddEmployeeButton_Click(object sender, RoutedEventArgs e)
         {
-            string lastName = LastNameTextBox.Text;
-            string firstName = FirstNameTextBox.Text;
-            string username = UsernameTextBox.Text;
-            string role = RoleComboBox.Text;
-            string email = EmailTextBox.Text;
-            string phone = PhoneTextBox.Text;
-            string password = PasswordBox.Password;
+            string lastName = LastNameTextBox.Text.Trim();
+            string firstName = FirstNameTextBox.Text.Trim();
+            string username = UsernameTextBox.Text.Trim();
+            string role = RoleComboBox.Text.Trim();
+            string email = EmailTextBox.Text.Trim();
+            string phone = PhoneTextBox.Text.Trim();
+            string password = PasswordBox.Password.Trim();
             int failedLoginAttempts = 0;
             bool isLocked = IsLockedCheckBox.IsChecked ?? false;
             bool isFirstLogin = true;
 
+            // Проверка заполненности полей
             if (string.IsNullOrWhiteSpace(lastName) ||
                 string.IsNullOrWhiteSpace(firstName) ||
                 string.IsNullOrWhiteSpace(username) ||
@@ -66,7 +67,8 @@ namespace Max
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Произошла ошибка при добавлении сотрудника: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                var innerExceptionMessage = ex.InnerException != null ? ex.InnerException.Message : "Нет дополнительной информации";
+                MessageBox.Show($"Произошла ошибка при добавлении сотрудника: {ex.Message}\n\nДополнительная информация: {innerExceptionMessage}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
